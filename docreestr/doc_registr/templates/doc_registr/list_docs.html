@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Документы компании</title>
+</head>
+<body>
+   {%if user %}
+    <h1>{{user.name}}</h1>
+    {% endif %}
+    <ul>
+        {% for doc in doc_list %}
+            <li>doc.name</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

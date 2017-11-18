@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Хранение документов в блокчейне</title>
+</head>
+<body>
+   <h1>Хранение документов в блокчейне</h1>
+    <ul>
+       {% if user_list %}
+        {%  for user in  user_list %}
+            <li><h2><a href="user{{user.id}}/">{{user.name}}</a></h2></li>
+        {% endfor %}
+        {% endif %}
+    </ul>
+</body>
+</html>
