@@ -2,6 +2,7 @@
 # 2017, Kozlov Vasiliy <crarkie@gmail.com>
 
 import ipfsapi
+import ipfsapi.exceptions as ipfs_ex
 
 
 class IPFSProvider:
@@ -10,19 +11,39 @@ class IPFSProvider:
         self.host = host
         self.port = port
 
-        self.ipfs = ipfsapi.connect(host, port)
+        try:
+            self.ipfs = ipfsapi.connect(host, port)
+        except ipfs_ex.ConnectionError:
+            raise IPFSConnectionError
 
     def upload_doc(self, doc_path) -> str:
-        value = self.ipfs.add(doc_path)
+        try:
+            value = self.ipfs.add(doc_path)
+        except ipfs_ex.StatusError:
+            raise IPFSStatusError
+        except ipfs_ex.ConnectionError:
+            raise IPFSConnectionError
 
         return value['Hash']
 
     def download_doc(self, doc_hash):
-        self.ipfs.get(doc_hash)
+        try:
+            self.ipfs.get(doc_hash)
+        except ipfs_ex.StatusError:
+            raise IPFSStatusError
+        except ipfs_ex.ConnectionError:
+            raise IPFSConnectionError
 
 
 class IPFSConnectionError(Exception):
     def __init__(self):
         self.msg = 'IPFS Connection error'
+    def __str__(self):
+        return self.msg
+
+
+class IPFSStatusError(Exception):
+    def __init__(self):
+        self.msg = 'IPFS Status error'
     def __str__(self):
         return self.msg
