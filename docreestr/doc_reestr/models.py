@@ -1,16 +1,14 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.utils.translation import ugettext_lazy as _
 
 # Create your models here.
-class UserDoc(AbstractBaseUser):
-    name = models.CharField(max_length = 50, unique = True)
-    INN = models.TextField()
-    wallet = models.TextField()
-    walletKey = models.TextField()
-    USERNAME_FIELDS = 'name'
-    REQUIRED_FIELDS = ['INN']
-
-    def create_user(self, name, INN, password=None):
+class User(models.Model):
+    name = models.CharField(max_length = 50, unique= True)
+    INN = models.TextField(unique = True)
+    password = models.TextField()
+    file = models.FileField()
 
 class Status(models.Model):
     title = models.CharField(max_length = 50)

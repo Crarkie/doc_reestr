@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% if sess %}
+        <p>Добро пожаловать, {{sess.name}} / <a href="http://localhost:8000/doc_reestr/logout">Выход</a></p>
+        <nav><ul>
+            <li><a href="http://localhost:8000/doc_reestr/doc">Мои документы</a></li>
+            <li><a href="http://localhost:8000/doc_reestr/load_doc">Добавить документ</a></li>
+            <li><a href="http://localhost:8000/doc_reestr/setting">Мои настройки</a></li></ul></nav>
+    {% endif %}
+    {% if sess is None %}
+        <p><a href="http://localhost:8000/doc_reestr/login">Войти</a>/<a href="http://localhost:8000/doc_reestr/registry">Регистрация</a></p>
+    {% endif %}
+    {% block content%}{% endblock %}
+</body>
+</html>

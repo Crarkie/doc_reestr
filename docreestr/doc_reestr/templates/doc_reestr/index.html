@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Хранение документов в блокчейне</title>
-</head>
-<body>
+{% extends "doc_reestr/menu.html" %}
+{% block content %}
    <h1>Хранение документов в блокчейне</h1>
     <ul>
        {% if user_list %}
@@ -13,5 +8,4 @@
         {% endfor %}
         {% endif %}
     </ul>
-</body>
-</html>
+{% endblock %}

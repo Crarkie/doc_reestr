@@ -1,5 +1,5 @@
 """
-WSGI config for docreestr project.
+WSGI config for hackaton_doc project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "docreestr.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hackaton_doc.settings")
 
 application = get_wsgi_application()

@@ -1,0 +1,21 @@
+{% extends 'doc_reestr/menu.html' %}
+{% block content %}
+    <table>
+        <thead>
+        <td>Название докумена</td>
+        <td>Статус</td>
+        <td>Ссылка на файл</td>
+        <td>Действия</td>
+        </thead>
+        <tbody>
+        {% for doc in docs %}
+            <tr>
+                <td>{{doc.name}}</td>
+                <td>{{doc.status}}</td>
+                <td>{{doc.hash_file}}</td>
+                <td><a href="doc{{doc.id}}/cancel">Отменить</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

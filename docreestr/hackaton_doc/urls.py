@@ -1,4 +1,4 @@
-"""docreestr URL Configuration
+"""hackaton_doc URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -17,6 +17,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^doc_registr/', include('doc_registr.urls')),
+    url(r'^doc_reestr/', include('doc_reestr.urls')),
     url(r'^admin/', admin.site.urls),
 ]

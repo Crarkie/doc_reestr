@@ -1,0 +1,11 @@
+{% extends 'doc_reestr/menu.html'%}
+{%block content %}
+   {%if user %}
+    <h1>{{user.name}}</h1>
+    {% endif %}
+    <ul>
+        {% for doc in doc_list %}
+            <li><a href="doc{{doc.id}}">{{doc.name}}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
