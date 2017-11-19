@@ -3,8 +3,10 @@ from django.template import loader
 from django.core.management import call_command
 from django.shortcuts import render, get_object_or_404
 from .models import Status, User, Document
-from .form import RegistryForm, LoginForm, LoadDocumentForm
+from .form import RegistryForm, LoginForm, LoadDocumentForm, SettingsForm
 from .transactions import *
+from base58 import b58encode
+from base58 import b58decode
 
 
 # Create your views here.
@@ -36,12 +38,10 @@ def preview(request, user_id, doc_id):
         user = User.objects.get(id = user_id)
     except Exception:
         user = None
-    try:
-        status = Status.objects.get(id = doc.id_status)
-    except Exception:
-        status = None
-    account = data_handler.get_document(doc.hash_file)['creator']
-    context = {'doc':doc, 'user': user, 'status': status, 'sess':sess, 'account' : account}
+    data_handler = DataHandler('localhost:5001', 'localhost:8545')
+    blockchain_doc = data_handler.get_document(b58decode(doc.hash_file))
+    context = {'doc':doc, 'user': user, 'status': Status.objects.get(id = blockchain_doc['state'].value),
+               'sess':sess, 'account' : blockchain_doc['creator']}
     return render(request, 'doc_reestr/preview.html', context)
 
 def login(request):
@@ -86,26 +86,35 @@ def registry(request):
 
 def load_doc(request):
     if 'id' in request.session:
-        if request == 'POST':
+        if request.method == 'POST':
             form = LoadDocumentForm(request.POST, request.FILES)
             if form.is_valid():
-                document = Document(name = form.cleaned_data['name'], id_user = request.session['id'], status = 3, hash = '')
+                user = User.objects.get(id = request.session['id'])
+
+
+                destination = open('upload', 'wb+')
+                for chunk in request.FILES['document'].chunks():
+                    destination.write(chunk)
+                destination.close()
+
+                doc = upload_document(file_path='upload',
+                                address=user.account, passphrase=form.cleaned_data['passphrase'])
+
+                document = Document(name=form.cleaned_data['title'],
+                                    id_user=User.objects.get(id=request.session['id']),
+                                    id_status=Status.objects.get(id = doc['state']), hash_file=b58encode(doc['hash']))
                 document.save()
 
-                user = User.objects.get(id = request.session['id'])
-                UploadCommand.execute(doc_id=document.id, file_path=request.FILES['document'],
-                                      address=user.wallet, passphrase=form.cleaned_data['passphrase'])
-
-                return HttpResponseRedirect('/user' + str(document.id_user) + '/doc' + str(document.id))
+                return HttpResponseRedirect('/user' + str(document.id_user.id) + '/doc' + str(document.id))
         else:
             form = LoadDocumentForm()
-        return render(request, 'doc_reestr/load_doc.html', {'form':form, 'sess':request.session})
+        return render(request, 'doc_reestr/load_doc.html', {'form':form.as_table(), 'sess':request.session})
     return HttpResponseRedirect('/doc_reestr')
 
 def my_doc(request):
     if 'id' in request.session:
         doc_list = Document.objects.filter(id_user = request.session['id'])
-        context = {'docs': doc_list, 'sess':request.session}
+        context = {'docs': doc_list, 'sess':request.session, 'user': request.session['id']}
         return render(request, 'doc_reestr/mydoc.html', context)
     else:
         return HttpResponseRedirect('doc_reestr')
@@ -115,4 +124,15 @@ def cancel(request, doc_id):
 
 def setting(request):
     sess = request.session if 'id' in request.session else None
-    return render(request, 'doc_reestr/setting.html', {'sess':sess})
+    if sess:
+        if request.method == 'POST':
+            form = SettingsForm(request.POST)
+            if form.is_valid():
+                user = User.objects.get(id = sess['id'])
+                user.account = form.cleaned_data['account']
+                user.save()
+                return HttpResponseRedirect('')
+        else:
+            form = SettingsForm()
+            user = User.objects.get(id=sess['id'])
+        return render(request, 'doc_reestr/setting.html', {'sess':sess, 'acc':user.account, 'form':form})

@@ -1,6 +1,7 @@
 {% extends 'doc_reestr/menu.html'%}
 {%block content %}
    {%if user %}
+    <center>
     <h1>{{user.name}}</h1>
     {% endif %}
     <ul>
@@ -8,4 +9,5 @@
             <li><a href="doc{{doc.id}}">{{doc.name}}</a></li>
         {% endfor %}
     </ul>
+    </center>
 {% endblock %}

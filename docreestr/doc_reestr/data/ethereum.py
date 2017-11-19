@@ -3,8 +3,9 @@
 
 import web3
 import logging
-import accounts as accs
-from state import DocState
+from .accounts import registerPassphrase
+from .accounts import registerAddress
+from .state import DocState
 from time import sleep
 from requests.exceptions import InvalidSchema
 
@@ -43,8 +44,8 @@ class EthereumContract:
             self.contract = provider.eth.contract(address=address, abi=abi)
         else:
             self.contract = provider.eth.contract(abi=abi, bytecode=code, bytecode_runtime=code_runtime)
-            self.provider.personal.unlockAccount(accs.registerAddress, accs.registerPassphrase)
-            tx_hash = self.contract.deploy({'from': accs.registerAddress, 'gasPrice':self.gasPrice, 'gas':1000000})
+            self.provider.personal.unlockAccount(registerAddress, registerPassphrase)
+            tx_hash = self.contract.deploy({'from': registerAddress, 'gasPrice':self.gasPrice, 'gas':1000000})
 
             print('TX: {0}'.format(tx_hash))
             transaction = self.pending_transaction(tx_hash)
@@ -64,28 +65,28 @@ class EthereumContract:
         return self.contract.address
 
     def register_user(self, address):
-        self.provider.personal.unlockAccount(accs.registerAddress, accs.registerPassphrase)
-        tx_hash = self.contract.transact({'from':accs.registerAddress, 'gasPrice':self.gasPrice}).register(address)
+        self.provider.personal.unlockAccount(registerAddress, registerPassphrase)
+        tx_hash = self.contract.transact({'from':registerAddress, 'gasPrice':self.gasPrice}).register(address)
         self.pending_transaction(tx_hash)
 
     def unregister_user(self, address):
-        self.provider.personal.unlockAccount(accs.registerAddress, accs.registerPassphrase)
-        tx_hash = self.contract.transact({'from':accs.registerAddress, 'gasPrice':self.gasPrice}).unregister(address)
+        self.provider.personal.unlockAccount(registerAddress, registerPassphrase)
+        tx_hash = self.contract.transact({'from':registerAddress, 'gasPrice':self.gasPrice}).unregister(address)
         self.pending_transaction(tx_hash)
 
     def get_document(self, hash):
-        self.provider.personal.unlockAccount(accs.registerAddress, accs.registerPassphrase)
-        doc = self.contract.call({'from':accs.registerAddress}).docs(hash)
+        self.provider.personal.unlockAccount(registerAddress, registerPassphrase)
+        doc = self.contract.call({'from':registerAddress}).docs(hash)
         return { 'creator' : doc[0], 'state' : DocState(doc[1]) }
 
     def create_document(self, hash, address):
-        tx_hash = self.contract.transact({'from':address, 'gasPrice':self.gasPrice, 'gas':60000}).createDoc(hash)
+        tx_hash = self.contract.transact({'from':address, 'gasPrice':self.gasPrice, 'gas':150000}).createDoc(hash)
         self.pending_transaction(tx_hash)
 
         return { 'status' : self.get_document(hash)['state'] }
 
     def outdate_document(self, hash, address):
-        tx_hash = self.contract.transact({'from':address, 'gasPrice':self.gasPrice, 'gas':60000}).outdateDoc(hash)
+        tx_hash = self.contract.transact({'from':address, 'gasPrice':self.gasPrice, 'gas':150000}).outdateDoc(hash)
         self.pending_transaction(tx_hash)
 
         return { 'status' : self.get_document(hash)['state'] }

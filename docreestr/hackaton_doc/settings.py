@@ -78,8 +78,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'docreestr_db',
-        'USER' : 'user_doc',
-        'PASSWORD' : '1234512345',
+        'USER' : 'user_name',
+        'PASSWORD' : 'docregister',
         'HOST' : '127.0.0.1',
         'PORT' : '5432',
     }

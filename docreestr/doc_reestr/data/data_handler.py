@@ -5,9 +5,9 @@ import logging
 import web3
 import json
 import base58
-from ipfs import IPFSProvider
-from ethereum import EthereumProvider
-from exceptions import *
+from .ipfs import IPFSProvider
+from .ethereum import EthereumProvider
+from .exceptions import *
 from enum import Enum
 
 
