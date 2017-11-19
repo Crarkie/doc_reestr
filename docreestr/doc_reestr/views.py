@@ -1,8 +1,10 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
+from django.core.management import call_command
 from django.shortcuts import render, get_object_or_404
 from .models import Status, User, Document
 from .form import RegistryForm, LoginForm, LoadDocumentForm
+from .transactions import *
 
 
 # Create your views here.
@@ -38,7 +40,8 @@ def preview(request, user_id, doc_id):
         status = Status.objects.get(id = doc.id_status)
     except Exception:
         status = None
-    context = {'doc':doc, 'user': user, 'status': status, 'sess':sess   }
+    account = data_handler.get_document(doc.hash_file)['creator']
+    context = {'doc':doc, 'user': user, 'status': status, 'sess':sess, 'account' : account}
     return render(request, 'doc_reestr/preview.html', context)
 
 def login(request):
@@ -84,13 +87,16 @@ def registry(request):
 def load_doc(request):
     if 'id' in request.session:
         if request == 'POST':
-            form = LoadDocumentForm(request.POST)
-            print
+            form = LoadDocumentForm(request.POST, request.FILES)
             if form.is_valid():
-                print('valid')
-                doc = Document(name = form.cleaned_data['name'], id_user = request.session['id'], id_status = 1)
-                doc.save()
-                return HttpResponseRedirect('/doc_reestr/load_doc')
+                document = Document(name = form.cleaned_data['name'], id_user = request.session['id'], status = 3, hash = '')
+                document.save()
+
+                user = User.objects.get(id = request.session['id'])
+                UploadCommand.execute(doc_id=document.id, file_path=request.FILES['document'],
+                                      address=user.wallet, passphrase=form.cleaned_data['passphrase'])
+
+                return HttpResponseRedirect('/user' + str(document.id_user) + '/doc' + str(document.id))
         else:
             form = LoadDocumentForm()
         return render(request, 'doc_reestr/load_doc.html', {'form':form, 'sess':request.session})

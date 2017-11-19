@@ -14,3 +14,4 @@ class LoginForm(Form):
 class LoadDocumentForm(Form):
     title = forms.CharField(label = 'Название документа')
     document = forms.FileField(label='Выберите файл', required = False)
+    passphrase = forms.CharField(label = 'Ключ аккаунта(не сохраняется)', widget=forms.PasswordInput)
