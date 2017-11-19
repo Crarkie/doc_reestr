@@ -4,15 +4,13 @@
 import logging
 import web3
 import json
+import base58
 from ipfs import IPFSProvider
 from ethereum import EthereumProvider
 from exceptions import *
 from enum import Enum
 
-class DocState(Enum):
-    Empty = 0,
-    Active = 1,
-    Outdated = 2
+
 
 class DataHandler:
     def __init__(self, ipfs_host, ethereum_host, contract_file='contract_address.json'):
@@ -49,24 +47,17 @@ class DataHandler:
             json.dump({'contract_address':self.ethereum_provider.get_contract().get_contract_address()}, cfile, indent=4)
 
     def upload_document(self, doc_path, address):
-        file_hash = self.ipfs_provider.upload_doc(doc_path)
-        transaction = self.ethereum_provider.get_contract().create_document(file_hash, address)
+        file_hash = base58.b58decode(self.ipfs_provider.upload_doc(doc_path))
+        transaction = self.ethereum_provider.get_contract().create_document(file_hash[2:], address)
 
-        return { 'status' : transaction['status'], 'hash' : file_hash }
+        return { 'hash' : file_hash }
 
     def outdate_document(self, hash, address):
-        transaction = self.ethereum_provider.get_contract().outdate_document(hash, address)
-
+        transaction = self.ethereum_provider.get_contract().outdate_document(hash[2:], address)
         return { 'status' : transaction['status']}
 
     def get_document(self, hash):
-        doc = self.ethereum_provider.get_contract().get_document(hash)
-
-        if doc['state'] == DocState.Empty:
-            return {'state': DocState.Empty, 'creator' : ''}
-        else:
-            self.ipfs_provider.download_doc(hash)
-            return {'state': doc['state'], 'creator' : doc['creator']}
+        return self.ethereum_provider.get_contract().get_document(hash[2:])
 
     def register_account(self, address):
         self.ethereum_provider.get_contract().register_user(address)
